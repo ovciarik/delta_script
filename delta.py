@@ -111,8 +111,9 @@ def print_time_to_go_home(current_delta):
     print(datetime.datetime.fromtimestamp(round(time.time() + TIME_OFFSET)))
 
     print('Time to go home: ', end='')
-    print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))))
-
+    print('\033[93m', end='')
+    print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))), end='')
+    print('\033[0m')
 
 def get_delta_from_csv():
     global TMP_FILE_PATH
