@@ -87,17 +87,26 @@ def get_deltas(token):
 def print_delta(message='', delta=''):
     print(message, end='')
     if delta < 0:
-        print('-', end='')
-    print(datetime.timedelta(milliseconds=abs(delta)))
+        print('\033[91m-', end='')
+    else:
+        print('\033[92m', end='')
+    print(datetime.timedelta(milliseconds=abs(delta)), end='')
+    print('\033[0m')
 
+
+def print_delta_i3(delta):
+    if delta < 0:
+        print('-')
+    print(datetime.timedelta(milliseconds=abs(delta)))
 
 def print_time_to_go_home(current_delta):
     global TIME_OFFSET
     time_to_go_home = round(time.time()) - (current_delta / 1000)
 
     time_to_go_home += TIME_OFFSET
+    print()
 
-    print('Current time: ', end='')
+    print('   Current time: ', end='')
     print(datetime.datetime.fromtimestamp(round(time.time() + TIME_OFFSET)))
 
     print('Time to go home: ', end='')
@@ -177,11 +186,11 @@ def main():
         current_delta, monthly_delta = get_delta_from_csv()
 
     if not args.i3:
-        print_delta(message='Delta (Month): ', delta=monthly_delta)
+        print_delta(message='  Delta (Month): ', delta=monthly_delta)
         print_delta(message='Delta (Current): ', delta=current_delta)
         print_time_to_go_home(current_delta=current_delta)
     else:
-        print_delta(delta=current_delta)
+        print_delta_i3(delta=current_delta)
 
 
 if __name__ == "__main__":
