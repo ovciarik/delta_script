@@ -99,6 +99,7 @@ def print_delta_i3(delta):
         print('-')
     print(datetime.timedelta(milliseconds=abs(delta)))
 
+
 def print_time_to_go_home(current_delta):
     global TIME_OFFSET
     time_to_go_home = round(time.time()) - (current_delta / 1000)
@@ -132,7 +133,6 @@ def update_csv(current_delta, monthly_delta):
     with open(TMP_FILE_PATH, 'w') as tmp_file:
         fieldnames = ['timestamp', 'current_delta', 'monthly_delta']
         writer = csv.DictWriter(tmp_file, fieldnames=fieldnames)
-
         writer.writeheader()
 
         writer.writerow({
@@ -140,7 +140,6 @@ def update_csv(current_delta, monthly_delta):
             'current_delta': int(round(current_delta)),
             'monthly_delta': int(round(monthly_delta))
         })
-
 
 def should_update():
     global TMP_FILE_PATH
@@ -191,6 +190,7 @@ def main():
         print_time_to_go_home(current_delta=current_delta)
     else:
         print_delta_i3(delta=current_delta)
+
 
 
 if __name__ == "__main__":

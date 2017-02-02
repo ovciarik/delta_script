@@ -2,4 +2,4 @@
 
 set URL, NAME and PASSWORD
 
-for max lulz: ./delta.py | cowsay | lolcat
+for max lulz: ./delta.py | cowsay -n | lolcat
