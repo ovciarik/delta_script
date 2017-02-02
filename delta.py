@@ -5,6 +5,7 @@ import requests
 import json
 import time
 import datetime
+import argparse
 
 URL = ''
 NAME = ''
@@ -13,6 +14,18 @@ PASSWORD = ''
 TIME_OFFSET = 3600
 HOUR_IN_MS = 28800000
 CURRENT_TIME = round(time.time())
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 def get_token():
     global NAME
@@ -79,12 +92,11 @@ def get_deltas(token):
 
     return current_delta, monthly_delta
 
-def print_delta(message, delta):
+def print_delta(message='', delta=''):
     print(message, end='')
     if delta < 0:
         print('-', end='')
     print(datetime.timedelta(milliseconds=abs(delta)))
-    print()
 
 def print_time_to_go_home(current_delta):
     global CURRENT_TIME
@@ -96,17 +108,25 @@ def print_time_to_go_home(current_delta):
     print('Current time: ', end='')
     print(datetime.datetime.fromtimestamp(round(CURRENT_TIME+TIME_OFFSET)))
 
-    print()
-
     print('Time to go home: ', end='')
-    print(datetime.datetime.fromtimestamp(round(time_to_go_home)))
+    print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))))
 
 def main():
+    parser = argparse.ArgumentParser(description='Short sample app')
+
+    parser.add_argument('--i3', action="store_true", default=False)
+
+    args = parser.parse_args()
+
     token = get_token()
     current_delta, monthly_delta = get_deltas(token=token)
-    print_delta(message='Delta (Month): ', delta=monthly_delta)
-    print_delta(message='Delta (Current): ', delta=current_delta)
-    print_time_to_go_home(current_delta=current_delta)
+
+    if not args.i3:
+        print_delta(message='Delta (Month): ', delta=monthly_delta)
+        print_delta(message='Delta (Current): ', delta=current_delta)
+        print_time_to_go_home(current_delta=current_delta)
+    else:
+        print_delta(delta=current_delta)
 
 if __name__ == "__main__":
     main()
