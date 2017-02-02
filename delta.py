@@ -13,19 +13,6 @@ PASSWORD = ''
 
 TIME_OFFSET = 3600
 HOUR_IN_MS = 28800000
-CURRENT_TIME = round(time.time())
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
 
 def get_token():
     global NAME
@@ -56,7 +43,6 @@ def get_token():
     return token
 
 def get_deltas(token):
-    global CURRENT_TIME
     global HOUR_IN_MS
     global URL
 
@@ -64,7 +50,7 @@ def get_deltas(token):
         'Content-Type': 'application/json;charset=utf-8',
         'authToken': token
     }
-    unix_time = int(CURRENT_TIME * 1000)
+    unix_time = int(round(time.time()) * 1000)
 
     url = URL + '/cxf/attendance/person/work-fund-state'
 
@@ -99,14 +85,13 @@ def print_delta(message='', delta=''):
     print(datetime.timedelta(milliseconds=abs(delta)))
 
 def print_time_to_go_home(current_delta):
-    global CURRENT_TIME
     global TIME_OFFSET
-    time_to_go_home = CURRENT_TIME - (current_delta/1000)
+    time_to_go_home = round(time.time()) - (current_delta/1000)
 
     time_to_go_home += TIME_OFFSET
 
     print('Current time: ', end='')
-    print(datetime.datetime.fromtimestamp(round(CURRENT_TIME+TIME_OFFSET)))
+    print(datetime.datetime.fromtimestamp(round(time.time()+TIME_OFFSET)))
 
     print('Time to go home: ', end='')
     print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))))
