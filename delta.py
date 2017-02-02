@@ -6,6 +6,8 @@ import json
 import time
 import datetime
 import argparse
+import csv
+import os.path
 
 URL = ''
 NAME = ''
@@ -13,6 +15,8 @@ PASSWORD = ''
 
 TIME_OFFSET = 3600
 HOUR_IN_MS = 28800000
+TMP_FILE_PATH = '/tmp/super_duper_delta_script_9000'
+
 
 def get_token():
     global NAME
@@ -41,6 +45,7 @@ def get_token():
 
     token = json.loads(r.text)['authToken']
     return token
+
 
 def get_deltas(token):
     global HOUR_IN_MS
@@ -73,10 +78,11 @@ def get_deltas(token):
     fund_until_now = actual_work_fund
     a = fund_until_now - HOUR_IN_MS
     b = worked_until_now - worked_today
-    monthly_delta = b-a
+    monthly_delta = b - a
     current_delta = duration * -1
 
     return current_delta, monthly_delta
+
 
 def print_delta(message='', delta=''):
     print(message, end='')
@@ -84,27 +90,90 @@ def print_delta(message='', delta=''):
         print('-', end='')
     print(datetime.timedelta(milliseconds=abs(delta)))
 
+
 def print_time_to_go_home(current_delta):
     global TIME_OFFSET
-    time_to_go_home = round(time.time()) - (current_delta/1000)
+    time_to_go_home = round(time.time()) - (current_delta / 1000)
 
     time_to_go_home += TIME_OFFSET
 
     print('Current time: ', end='')
-    print(datetime.datetime.fromtimestamp(round(time.time()+TIME_OFFSET)))
+    print(datetime.datetime.fromtimestamp(round(time.time() + TIME_OFFSET)))
 
     print('Time to go home: ', end='')
     print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))))
 
+
+def get_delta_from_csv():
+    global TMP_FILE_PATH
+
+    with open(TMP_FILE_PATH, 'r') as tmp_file:
+        reader = csv.DictReader(tmp_file)
+        for row in reader:
+            delta_delta = int(abs(int(row['timestamp'])-int(time.time())))
+            current_delta = round(int(row['current_delta']) + delta_delta*1000)
+            monthly_delta = int(row['monthly_delta'])
+
+    return current_delta, monthly_delta
+
+
+def update_csv(current_delta, monthly_delta):
+    global TMP_FILE_PATH
+
+    with open(TMP_FILE_PATH, 'w') as tmp_file:
+        fieldnames = ['timestamp', 'current_delta', 'monthly_delta']
+        writer = csv.DictWriter(tmp_file, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        writer.writerow({
+            'timestamp': int(round(time.time())),
+            'current_delta': int(round(current_delta)),
+            'monthly_delta': int(round(monthly_delta))
+        })
+
+def should_update():
+    global TMP_FILE_PATH
+    result = True
+
+    with open(TMP_FILE_PATH, 'r') as tmp_file:
+        reader = csv.DictReader(tmp_file)
+        for row in reader:
+            timestamp = row['timestamp']
+            if round(abs(time.time()) - int(timestamp)) < 3600:
+                result = False
+
+    return result
+
+
 def main():
+    global TMP_FILE_PATH
     parser = argparse.ArgumentParser(description='Short sample app')
-
-    parser.add_argument('--i3', action="store_true", default=False)
-
+    parser.add_argument('--i3', action="store_true", default=False,
+                        help='show only current delta, good for i3status')
+    parser.add_argument('--force', action="store_true", default=False,
+                        help='force new tmp file and update from server')
     args = parser.parse_args()
 
-    token = get_token()
-    current_delta, monthly_delta = get_deltas(token=token)
+    # check if file exist
+    if args.force or not os.path.isfile(TMP_FILE_PATH):
+        # init file
+        with open(TMP_FILE_PATH, 'w') as tmp_file:
+            fieldnames = ['timestamp', 'current_delta', 'monthly_delta']
+            writer = csv.DictWriter(tmp_file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow({
+                'timestamp': 0,
+                'current_delta': 0,
+                'monthly_delta': 0,
+            })
+
+    if args.force or should_update():
+        token = get_token()
+        current_delta, monthly_delta = get_deltas(token=token)
+        update_csv(current_delta, monthly_delta)
+    else:
+        current_delta, monthly_delta = get_delta_from_csv()
 
     if not args.i3:
         print_delta(message='Delta (Month): ', delta=monthly_delta)
@@ -113,6 +182,6 @@ def main():
     else:
         print_delta(delta=current_delta)
 
+
 if __name__ == "__main__":
     main()
-
