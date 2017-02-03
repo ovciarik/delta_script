@@ -1,21 +1,6 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-
-PASSWORD = ''
-
-
-
-
-
-
-
-
-
-
-
-
-
 import requests
 import json
 import time
@@ -26,7 +11,7 @@ import os.path
 
 URL = ''
 NAME = ''
-
+PASSWORD = ''
 
 TIME_OFFSET = 3600
 HOUR_IN_MS = 28800000
@@ -85,8 +70,14 @@ def get_deltas(token):
     summary_records = json.loads(r.text)['summaryRecords']
     duration = json.loads(r.text)['difference']
 
+    code_list = []
     for elem in summary_records:
-        if elem['code'] == '108':
+        # get highest code
+
+        code_list.append(int(elem['code']))
+
+    for elem in summary_records:
+        if int(elem['code']) == max(code_list):
             worked_today = elem['duration']
 
     worked_until_now = worked_time_from_work_fund
@@ -130,6 +121,7 @@ def print_time_to_go_home(current_delta):
     print(str(datetime.datetime.fromtimestamp(round(time_to_go_home))), end='')
     print('\033[0m')
 
+
 def get_delta_from_csv():
     global TMP_FILE_PATH
 
@@ -157,6 +149,7 @@ def update_csv(current_delta, monthly_delta):
             'monthly_delta': int(round(monthly_delta))
         })
 
+
 def should_update():
     global TMP_FILE_PATH
     result = True
@@ -173,12 +166,23 @@ def should_update():
 
 def main():
     global TMP_FILE_PATH
+    global URL
+    global NAME
+    global PASSWORD
     parser = argparse.ArgumentParser(description='Short sample app')
     parser.add_argument('--i3', action="store_true", default=False,
                         help='show only current delta, good for i3status')
     parser.add_argument('--force', action="store_true", default=False,
                         help='force new tmp file and update from server')
     args = parser.parse_args()
+
+    if os.path.isfile('./login_info'):
+        with open('./login_info', 'r') as login:
+            reader = csv.DictReader(login)
+            for row in reader:
+                URL = row['url']
+                NAME = row['name']
+                PASSWORD = row['password']
 
     # check if file exist
     if args.force or not os.path.isfile(TMP_FILE_PATH):
