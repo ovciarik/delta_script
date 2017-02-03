@@ -6,6 +6,6 @@ file format:
 
 url,name,password
 
-http://xxx.xxx.xxx,name.name,password
+https://xxx.xxx.xxx,name.name,password
 
 for max lulz: ./delta.py | cowsay -n | lolcat
