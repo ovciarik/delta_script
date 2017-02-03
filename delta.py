@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+
+PASSWORD = ''
+
+
+
+
+
+
+
+
+
+
+
+
+
 import requests
 import json
 import time
@@ -11,7 +26,7 @@ import os.path
 
 URL = ''
 NAME = ''
-PASSWORD = ''
+
 
 TIME_OFFSET = 3600
 HOUR_IN_MS = 28800000
@@ -96,7 +111,7 @@ def print_delta(message='', delta=''):
 
 def print_delta_i3(delta):
     if delta < 0:
-        print('-')
+        print('-', end='')
     print(datetime.timedelta(milliseconds=abs(delta)))
 
 
