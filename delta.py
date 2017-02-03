@@ -176,13 +176,12 @@ def main():
                         help='force new tmp file and update from server')
     args = parser.parse_args()
 
-    if os.path.isfile('./login_info'):
-        with open('./login_info', 'r') as login:
-            reader = csv.DictReader(login)
-            for row in reader:
-                URL = row['url']
-                NAME = row['name']
-                PASSWORD = row['password']
+    if os.path.isfile('./config.json'):
+        with open('./config.json', 'r') as config:
+            data = json.load(config)
+            URL = data['url']
+            NAME = data['name']
+            PASSWORD = data['password']
 
     # check if file exist
     if args.force or not os.path.isfile(TMP_FILE_PATH):
@@ -210,7 +209,6 @@ def main():
         print_time_to_go_home(current_delta=current_delta)
     else:
         print_delta_i3(delta=current_delta)
-
 
 
 if __name__ == "__main__":
