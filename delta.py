@@ -8,6 +8,7 @@ import datetime
 import argparse
 import csv
 import os.path
+import sys
 
 URL = ''
 NAME = ''
@@ -175,9 +176,11 @@ def main():
     parser.add_argument('--force', action="store_true", default=False,
                         help='force new tmp file and update from server')
     args = parser.parse_args()
+    dirname = os.path.dirname(sys.argv[0])
+    print(dirname)
 
-    if os.path.isfile('./config.json'):
-        with open('./config.json', 'r') as config:
+    if os.path.isfile(dirname+'/config.json'):
+        with open(dirname+'/config.json', 'r') as config:
             data = json.load(config)
             URL = data['url']
             NAME = data['name']
